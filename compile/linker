@@ -1,0 +1,139 @@
+
+
+
+example1:
+
+SECTIONS {
+     . = 0x1000;
+     .text : {
+         *(.text)
+         _etext = .;
+     }
+     .data 0x2000 : AT(ADDR(.text) + SIZEOF(.text)) {
+        _sdata = .;
+        *(.data)
+        _edata = .;
+     }
+     .bss 0x3000 : {
+        _sbss = .;
+        *(.bss)
+        *(COMMON)
+        _ebss;
+     }
+}
+
+    dot . within section is relative, otherwise is absolute, you
+    can force it to be absolute with ABSOLUTE(.)
+
+a) fix the location counter to 0x1000, it's vma address
+
+b) .text section's vma address is set to 0x1000, _etext is vma
+   address of .text section end.
+   
+   If the lma is not explicitly specified, it's equal to vma.
+   Thus the load address of .text is 0x1000
+
+c) .data section follows .text section, however, .data section's
+   vma address fixed at 0x2000, its lma is set to the end of .text
+   section. Hence, .data section follows .text section in physcial
+   memory.
+
+   _data_start define the start address of .data section's lma, and
+   _data_end defines the end address of .data section's lma
+
+d) .bss section is used to description the lma of uninitialized
+   variables, this section doesn't take physical ROM, but takes
+   RAM at run time.
+
+e) ADDR(*) gets section's absolute vma address, LOADADDR(*) gets 
+   the absolute lma address.
+
+f) The graphic of the image at the ROM and runtime distribution
+
+                  
+                +------+ 0x1000            +------+ 0x1000
+                | ROM  |                   | ROM  |
+                |      | .text             |      | .text
+                +------+                   +------+
+                | ROM  | .data     
+                |      |                   +------+ 0x2000
+                +------+                   | RAM  | .data
+                                           +------+
+                                           | RAM  | .bss
+                                           +------+
+
+    programs to copy the .data section from ROM to RAM
+
+    extern char _etext, _data, _edata, _sbss, _ebss;
+    char *src = &_etext;
+    char *dst = &_sdata;
+
+    // copy .data section from ROM to RAM
+    while (dst < &_edata) {
+        *dst++ = *src++    
+    }
+
+    // zero initialize .bss section in RAM
+    for (dst = &_sbss; dst < &_ebss; dst++)
+        *dst = 0;
+
+
+example 2:
+
+  .text : {
+    *(.text)
+    . += 0x100
+  } = 0x12345678;
+
+a) .text section takes extra 0x100 bytes, which is fill with 
+   0x12345678
+
+
+
+
+
+example 3:    Memory layout
+
+format:
+
+    MEMORY {
+        name (attr) : ORIGIN = origin, LENGTH = len
+        ...
+    }
+
+    for example, 
+        MEMORY {
+            rom (rx) : ORIGIN = 0, LENGTH = 256K
+            ram (!rx) : org = 0x4000000, l = 4M
+        }
+
+    possible attrs:
+    'R' read only section
+    'W' read/write section
+    'X' section containing executable code
+    'A' allocate sections
+    'I' Initialzied sections
+    'L' same as I
+    '!' invert the sense of any of the following attributes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

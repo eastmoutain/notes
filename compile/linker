@@ -87,6 +87,7 @@ example 2:
 
 a) .text section takes extra 0x100 bytes, which is fill with 
    0x12345678
+<<<<<<< HEAD
 
 
 
@@ -115,25 +116,4 @@ format:
     'I' Initialzied sections
     'L' same as I
     '!' invert the sense of any of the following attributes
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

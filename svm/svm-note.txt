@@ -1,0 +1,39 @@
+
+
+
+=================
+kvm init       called when kvm module insmod
+|--kvm_arch_init()
+|   |--kvm_mmu_module_init()
+|   |--kvm_mmu_set_mask_ptes()
+|--kvm_arch_hardware_setup()
+|   |--kvm_x86_ops->hardware_setup()
+|   |   |--//...
+|   |   |--sev_hardware_setup()
+|   |   |--sev_cpu_init()
+|   |   |--kvm_enable_tdp()
+|   |-- // tsc init
+
+
+
+==================
+create vcpu
+
+kvm_vm_ioctl_create_vcpu
+|--kvm_arch_vcpu_create()
+|   |--kvm_x86_ops->vcpu_create() // svm_create_vcpu()
+|   |   |-- // alloc svm
+|   |   |--kvm_vcpu_init() // alloc vcpu->run
+|   |   |   |--kvm_arch_vcpu_init()
+|   |   |   |   |--kvm_mmu_create() //init vcpu->arch.*mmu
+|   |   |   |   |   |--alloc_mmu_pages() // root page
+|   |   |-- // alloc msrpm_pages, hsave_pages...
+|   |   |--svm_vcpu_init_msrpm()
+|   |   |--init_vmcb()
+|   |   |--svm_init_osvm()
+|--preempt_notifier_init()
+|--kvm_arch_vcpu_setup()
+|--kvm_create_vcpu_debugfs()
+|--create_vcpu_fd()
+
+
